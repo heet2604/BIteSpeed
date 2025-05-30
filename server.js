@@ -1,8 +1,8 @@
-require('dotenv').config
+require('dotenv').config()
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
-const connectDB = require('./config.js')
+const {connectDB} = require('./config.js')
 const Contact = require('./models/Contact')
 
 const app = express();
@@ -23,7 +23,7 @@ app.post('/identify',async (req,res)=>{
             $or : [
                 {email : email},
                 {phoneNumber : phoneNumber}
-            ],
+            ],  
             deletedAt : null
         }).sort({createdAt : 1})
         
@@ -54,18 +54,18 @@ app.post('/identify',async (req,res)=>{
             c => c.linkPrecedence === 'primary' && !c._id.equals(primaryContact._id)
         );
 
-        if(otherPrimaries > 0){
+        if(otherPrimaries.length > 0){
             for (const primary of otherPrimaries){
                 primary.linkPrecedence = 'secondary';
                 primary.linkedId = primaryContact._id;
-                primary.updatedId = new Date();
+                primary.updatedAt = new Date();
                 await primary.save();
             }
         }
 
         //check if new secondary is needed
         const hasnewInfo = (
-            (email && !matchingContacts.some(c => c.phoneNumber === phoneNumber)) ||
+            (email && !matchingContacts.some(c => c.email === email)) ||
             (phoneNumber && !matchingContacts.some(c => c.phoneNumber === phoneNumber))
         )
 
