@@ -15,10 +15,12 @@ connectDB()
 app.post('/identify',async (req,res)=>{
     try{
         const {email,phoneNumber} = req.body;
+        //check inputs and reject null entries
         if(!email && !phoneNumber){
             return res.status(400).json({error : 'Either email or phone number must be provided'});
         }
 
+        //search by email or phonenumber , sort them in ascending order
         const matchingContacts = await Contact.find({
             $or : [
                 {email : email},
@@ -26,7 +28,9 @@ app.post('/identify',async (req,res)=>{
             ],  
             deletedAt : null
         }).sort({createdAt : 1})
-        
+
+
+        //if no matching contacts , create a new user else return the contact info
         if(matchingContacts.length===0){
             const newContact = new Contact({
                 email,
@@ -45,6 +49,7 @@ app.post('/identify',async (req,res)=>{
             })
         }
 
+        //find the primary if not found make the oldest entry -> primary
         let primaryContact = matchingContacts.find(c=>c.linkPrecedence==='primary');
         if(!primaryContact){
             primaryContact = matchingContacts[0]
@@ -54,6 +59,7 @@ app.post('/identify',async (req,res)=>{
             c => c.linkPrecedence === 'primary' && !c._id.equals(primaryContact._id)
         );
 
+        //if mulitple entries , make them secondary and link them to primary
         if(otherPrimaries.length > 0){
             for (const primary of otherPrimaries){
                 primary.linkPrecedence = 'secondary';
@@ -85,6 +91,7 @@ app.post('/identify',async (req,res)=>{
             deletedAt:null
         });
 
+        //prepare response
         const allContacts = [primaryContact,...secondaryContacts]
         const uniqueEmails = [...new Set(allContacts.map(c=>c.email).filter(e=>e))];
         const uniquePhones = [...new Set(allContacts.map(c=>c.phoneNumber).filter(p=>p))]
