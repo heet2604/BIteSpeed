@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
-export const connectDB = async () => {
+const connectDB = async () => {
     try {
         const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:5000/bitespeed', {
             useNewUrlParser: true,
@@ -11,3 +11,5 @@ export const connectDB = async () => {
         console.log("Error occurred", error);
     }
 };
+
+module.exports = {connectDB}
