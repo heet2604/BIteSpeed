@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
     try {
-        const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:5000/bitespeed', {
+        const conn = await mongoose.connect(process.env.MONGODB_URI ||  'mongodb://host.docker.internal:27017/bitespeed' , {
             useNewUrlParser: true,
             useUnifiedTopology: true
         });
@@ -12,4 +12,4 @@ const connectDB = async () => {
     }
 };
 
-module.exports = {connectDB}
+module.exports = connectDB
